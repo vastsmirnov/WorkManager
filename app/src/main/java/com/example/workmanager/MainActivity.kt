@@ -3,6 +3,7 @@ package com.example.workmanager
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.work.WorkManager
+import com.example.workmanager.chain.SayKittyWorker
 import com.example.workmanager.databinding.ActivityMainBinding
 import com.example.workmanager.onetime.SayHelloWorker
 import com.example.workmanager.periodic.PeriodicTimeEvent
@@ -45,16 +46,37 @@ class MainActivity : AppCompatActivity() {
         WorkManager.getInstance(this).enqueue(PeriodicTimeReaderWorker.makeRequest())
 
         WorkManager.getInstance(this).cancelAllWorkByTag(SayHelloWorker.TAG)
-        val request = SayHelloWorker.makeRequest()
-        WorkManager.getInstance(this).enqueue(request)
+        WorkManager.getInstance(this).cancelAllWorkByTag(SayKittyWorker.TAG)
+
+        val helloRequest = SayHelloWorker.makeRequest()
+        val kittyRequest = SayKittyWorker.makeRequest()
+
         WorkManager.getInstance(this)
-            .getWorkInfoByIdLiveData(request.id)
+            .beginWith(helloRequest)
+            .then(kittyRequest)
+            .enqueue()
+
+        WorkManager.getInstance(this)
+            .getWorkInfoByIdLiveData(helloRequest.id)
             .observe(this) {
                 if (it.state.isFinished) binding.oneTimeTv.text =
                     it.outputData.getString(SayHelloWorker.KEY_OUTPUT_DATA)
             }
 
+        WorkManager.getInstance(this)
+            .getWorkInfoByIdLiveData(kittyRequest.id)
+            .observe(this) {
+                if (it.state.isFinished) binding.kittyOneTimeTv.text =
+                    it.outputData.getString(SayKittyWorker.KEY_OUTPUT_DATA)
+            }
+
         setContentView(binding.root)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        WorkManager.getInstance(this).cancelAllWork()
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
