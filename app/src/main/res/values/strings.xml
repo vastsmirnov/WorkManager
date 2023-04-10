@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">WorkManager</string>
+    <string name="time">Время:</string>
+    <string name="default_time">00:00:00</string>
+    <string name="recursive_one_time_work">Recursive One Time Work</string>
+    <string name="periodic_work">Periodic Work</string>
+    <string name="say_hello_work">Say Hello Work</string>
+    <string name="message">Message</string>
+    <string name="say_kitty_work">Say Kitty Work</string>
 </resources>
